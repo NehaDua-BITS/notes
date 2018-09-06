@@ -1,0 +1,168 @@
+GET: read/get/retrive data
+HEAD: used to return metadata and not complete body
+POST: insert data (add something to server side database)
+PUT/PATCH: update data or insert if a new id
+DELETE: to delete resource
+
+read only method: GET
+write methods: Post, Put, Patch, Delete
+
+Idempotence:
+
+PUT vs POST:
+put -> to update resource
+post -> to create resource
+
+GET: 
+Since get is a read only method, it is safe to make any number of get requests to server.
+so no side effects on server.
+
+DELETE: 
+Repeated delete calls don't have side effects cz once it is deleted other calls won't have any effect.
+
+PUT:
+In case of put also, same resource will be replaced with the new data. 
+So no side effects. Same thing overwritten every time
+
+POST:
+everytime u make post request something new happens i.e. duplicate resource is 
+generated everytime
+So every duplicate call changes something on the server which is not good
+
+
+Get, put, delete -> safely repeatable methods (Idempotent methods)
+post -> not safe to repeat (Non-idempotent)
+
+Thus: put -> should be ideally used for update;
+	  post-> should be ideally used for resource creation 
+
+Side effect of using incorrect method:
+1. client might get confused
+2. it might generate wrong or undesired results
+
+
+
+Idempotence:
+it's the property of operations which means that operation can be applied multiple 
+times without changing the result beyond the initial application.
+
+
+SSL:
+
+Why SSL:
+-> Encryption => hiding data sent
+-> Identification => making sure that you are talking to trusted one
+
+Steps SSL 3.3:
+1. Handshake - computers agree on how to encrypt:
+-> client sends hello msg to server with following: key exchange method, cipher and hash
+-> Sends random number which is used to generate Master Secret.
+
+2. Server sends the certificate:
+-> Certificate has following: serial no., validity, issuer details, Public Key, signature algo, signature, issuer identifier, company identifier, company details, algorithm id, version
+
+3. Client says start encrypting:
+-> It sends 3 messages for this:
+	1. client key exchange : both generate master secretkey using this which is used for encryption
+	2. change cipher spec: this means start encrypting
+	3. finished
+	
+4. Server also says start encrypting:
+	It sends 2 msgs: 
+	1. change cipher spec (means im starting encrypting) 
+	2. finsihed(sent in ecrypted form)	
+
+5. All messages are encrypted now.
+
+Note:
+Just having SSL certificate doesn't mean that u r talking correct person. 
+So identification is also needed.
+
+
+How to obtain certificate:
+1. Company contacts CA.
+2. CA verifies its details, creates a certificate and signs it.
+3. Certificate is sent back to company and installed on its server. Web server is configured to use it.
+4. Browser of client is issued with root certificates.
+5. It trusts only correctly signed certificates.
+
+------------------------------------------------------------------------
+
+HTTP:
+->stateless protocol i.e. it doesn't maintain any information/status about user for the session of multiple requests 
+->session info can be maintained using:
+	http cookies
+	serve side sessions/variables
+	url rewriting
+	
+----------------------------------------------------------------------------
+
+DNS Records:
+-> they contain data requested by client
+
+1. MX Records:
+-> Mail Exchange Record
+-> identified mail server for dns name
+-> specifies mail server responsible for accepting email messages on behalf of reciepient's domain
+-> Mail servers have priority defined; server with smallest number has higher priority; in case of same priority selection is random
+-> set of mx records specifies how email should be routed using smtp
+-> they do not take effect immediately
+-> google server: aspmx.l.google.com ; alt1.aspmx..., alt2.aspmx...
+-> delay of mx record = TTL
+-> mail servers do not have to belong to same domain name; they just know how to deliver mails to destination domain
+-> in case primary/secondary server fails, other will keep the mails until former is up again and then transfers all mails to it
+
+2. Host - A and AAAA records:
+-> stores ip address for a name/host
+-> A-> stores ipv4 and AAAA-> stores ipv6
+-> when client sends name to dns server it checks A/AAAA record and sends it back
+
+3. CNAME (i.e. Alias) record
+-> alternative or alias record for another record
+-> also called canonical name
+-> it's just another name(mostly simpler) given to a record
+-> whenever client requests for cname's ipaddress, A record of source name is returned
+-> Benefit??:
+	1. If we have multiple A records pointing to single ip, then we have to change all of them whenever ip changes; cname prevents that
+	2. cname can be used to route user to another server. For ex: if server1 is down for maintenance, we can change cname record to point to server2; then traffic will go to server2 and not server1 (only condition is that client shouldn't have cached old ip)
+	
+
+4. Service Record(SRV):
+->  indicates location of specific service on network
+-> has following data:
+   1. service
+   2. target (host that offers service)
+   3. port
+   4. priority
+-> usually created automatically by applications that require them
+
+
+5. SOA - start of authority:
+-> there can be multiple zones in dns
+-> soa record is one per zone
+-> it gives info about:
+	1. primary name server of zone
+	   -> has read/write copy of that zone
+	   -> primary or upto date dns for that zone for answering queries for records
+	2. email of zone administrator
+	3. serial no. of zone : 
+	   - each time a zone is changed, serial no. is incremented   
+	   - it is used to keep duplicate copies of zone data in sync
+	   - if another copy in a zone has different number, dns knows that it has to be updated
+	4. refresh time for the zone"
+	  - secondary zones use this information to know when to look for updated information in the zone
+	  - if ur zone file changes very often better to keep time as low to avoid stale data for long
+	 
+	 	     	
+6. Name Server (NS):
+-> contains authority dns servers for that domain
+-> can be dns server with secondary zones
+-> is considered the best source for answering queries of that zone
+-> thus, they don't contain cached data for that zone
+
+7. Pointer (PTR):
+-> provides mapping from ip address to name (opposite of A record)
+-> used for reverse look up tools
+
+
+
